@@ -17,11 +17,11 @@ int Device::bind() {
 
     sockaddr_in bind_address;
     bind_address.sin_family = AF_INET;
-    bind_address.sin_port = htons(local_port);
+    bind_address.sin_port = htons(0);
     bind_address.sin_addr.s_addr = inet_addr(local_ip.c_str());
-
+    
     auto bind_status = ::bind(sockfd, (struct sockaddr *)&bind_address, sizeof(bind_address));
-    if (bind_status) {
+    if (bind_status) {        
         spdlog::error("socket bind failed: {}", bind_status);
         return bind_status;
     }
