@@ -21,6 +21,8 @@ class Nalu {
     char* packet;
     int length;
     NaluType type;
+    int spsLength;
+    int ppsLength;
 
     ~Nalu() {
         if (packet != nullptr) {

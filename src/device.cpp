@@ -88,21 +88,47 @@ void Device::push_rtp_stream() {
                 memcpy(frame + index, ps_map_header, PSM_HDR_LEN);
                 index += PSM_HDR_LEN;
 
+                //封装pes
+                gb28181_make_pes_header(pes_header, 0xe0, nalu->spsLength, pts, pts);
+
+                memcpy(frame + index, pes_header, PES_HDR_LEN);
+                index += PES_HDR_LEN;
+
+                memcpy(frame + index, packet, nalu->spsLength);
+                index += nalu->spsLength;
+
+                //封装pes
+                gb28181_make_pes_header(pes_header, 0xe0, nalu->ppsLength, pts, pts);
+
+                memcpy(frame + index, pes_header, PES_HDR_LEN);
+                index += PES_HDR_LEN;
+
+                memcpy(frame + index, packet + nalu->spsLength, nalu->ppsLength);
+                index += nalu->ppsLength;
+
+                //封装pes
+                gb28181_make_pes_header(pes_header, 0xe0, length - nalu->ppsLength - nalu->ppsLength, pts, pts);
+
+                memcpy(frame + index, pes_header, PES_HDR_LEN);
+                index += PES_HDR_LEN;
+
+                memcpy(frame + index, packet + nalu->spsLength + nalu->ppsLength, length - nalu->ppsLength - nalu->ppsLength);
+                index += length - nalu->ppsLength - nalu->ppsLength;
             } else {
                 gb28181_make_ps_header(ps_header, pts);
 
                 memcpy(frame, ps_header, PS_HDR_LEN);
                 index += PS_HDR_LEN;
+
+                //封装pes
+                gb28181_make_pes_header(pes_header, 0xe0, length, pts, pts);
+
+                memcpy(frame + index, pes_header, PES_HDR_LEN);
+                index += PES_HDR_LEN;
+
+                memcpy(frame + index, packet, length);
+                index += length;
             }
-
-            //封装pes
-            gb28181_make_pes_header(pes_header, 0xe0, length, pts, pts);
-
-            memcpy(frame + index, pes_header, PES_HDR_LEN);
-            index += PES_HDR_LEN;
-
-            memcpy(frame + index, packet, length);
-            index += length;
 
             //组包rtp
 

@@ -53,6 +53,8 @@ void out_nalu(char *buffer, int size, NaluType naluType) {
         memcpy(packet + sps_data_length, pps_data, pps_data_length);
         memcpy(packet + sps_data_length + pps_data_length, buffer, size);
         size += (sps_data_length + pps_data_length);
+        nalu->spsLength = sps_data_length;
+        nalu->ppsLength = pps_data_length;
     } else {
         memcpy(packet, buffer, size);
     }
