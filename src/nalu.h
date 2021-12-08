@@ -17,8 +17,8 @@ typedef enum {
 } NaluType;
 
 class Nalu {
-public:
-    char * packet;
+   public:
+    char* packet;
     int length;
     NaluType type;
 

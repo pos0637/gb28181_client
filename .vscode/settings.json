@@ -5,6 +5,17 @@
         "string": "cpp",
         "thread": "cpp",
         "tuple": "cpp",
-        "cstdint": "cpp"
+        "cstdint": "cpp",
+        "string_view": "cpp",
+        "regex": "cpp",
+        "array": "cpp",
+        "chrono": "cpp",
+        "functional": "cpp",
+        "istream": "cpp",
+        "memory_resource": "cpp",
+        "ostream": "cpp",
+        "ratio": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp"
     }
 }

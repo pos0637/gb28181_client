@@ -1,7 +1,8 @@
 #include <string>
-#include "spdlog/spdlog.h"
+
 #include "cxxopts.h"
 #include "device.h"
+#include "spdlog/spdlog.h"
 
 using namespace std;
 
@@ -11,23 +12,20 @@ int main(int argc, const char* argv[]) {
     try {
         cxxopts::Options options(argv[0], "a gb28181 client - mainly used for testing");
 
-        options.add_options()
-            ("h, help", "Print usage")
-            ("server-id", "specify the sip server id", cxxopts::value<std::string>())
-            ("server-ip", "specify the sip server ip address", cxxopts::value<std::string>())
-            ("server-port", "specify the sip server port", cxxopts::value<int>())
-            ("device-id", "specify the gb28181 device id", cxxopts::value<std::string>())
-            ("device-port", "specify the gb28181 device port", cxxopts::value<int>())
-            ("username", "specify the gb28181 device username", cxxopts::value<std::string>())
-            ("password", "specify the gb28181 device password", cxxopts::value<std::string>())
-            ("manufacture", "specify the manufacture of the gb28181 device", cxxopts::value<std::string>())
-            ("filepath", "specify the file path of the video sample", cxxopts::value<std::string>())
-            ;
+        options.add_options()("h, help", "Print usage")("server-id", "specify the sip server id",
+                                                        cxxopts::value<std::string>())(
+            "server-ip", "specify the sip server ip address", cxxopts::value<std::string>())(
+            "server-port", "specify the sip server port", cxxopts::value<int>())(
+            "device-id", "specify the gb28181 device id", cxxopts::value<std::string>())(
+            "device-port", "specify the gb28181 device port", cxxopts::value<int>())(
+            "username", "specify the gb28181 device username", cxxopts::value<std::string>())(
+            "password", "specify the gb28181 device password", cxxopts::value<std::string>())(
+            "manufacture", "specify the manufacture of the gb28181 device", cxxopts::value<std::string>())(
+            "filepath", "specify the file path of the video sample", cxxopts::value<std::string>());
 
         options_result = options.parse(argc, argv);
 
-        if (options_result.count("help"))
-        {
+        if (options_result.count("help")) {
             std::cout << options.help() << std::endl;
             exit(0);
         }
@@ -84,7 +82,7 @@ int main(int argc, const char* argv[]) {
         password = "";
     } else {
         password = options_result["password"].as<string>();
-    }   
+    }
 
     string manufacture;
     if (!options_result.count("manufacture")) {
@@ -111,10 +109,7 @@ int main(int argc, const char* argv[]) {
     spdlog::info("sample file path: {}", filepath);
     spdlog::info("");
 
-    auto device = shared_ptr<Device>(
-        new Device(server_id, server_ip, server_port, 
-            device_id, username, password, device_port, manufacture,
-            filepath)
-        );
+    auto device = shared_ptr<Device>(new Device(server_id, server_ip, server_port, device_id, username, password,
+                                                device_port, manufacture, filepath));
     device->start();
 }
