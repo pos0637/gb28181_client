@@ -155,8 +155,7 @@ void Device::push_rtp_stream() {
                 }
 
                 memcpy(rtp_packet + rtp_start_index, rtp_header, RTP_HDR_LEN);
-                memcpy(rtp_packet + +rtp_start_index + RTP_HDR_LEN, frame + (i * single_packet_max_length),
-                       writed_count);
+                memcpy(rtp_packet + +rtp_start_index + RTP_HDR_LEN, frame + (i * single_packet_max_length), writed_count);
                 rtp_seq++;
 
                 if (is_pushing) {
@@ -222,8 +221,7 @@ void Device::start() {
     eXosip_clear_authentication_info(sip_context);
 
     osip_message_t* register_message = nullptr;
-    int register_id = eXosip_register_build_initial_register(sip_context, from_sip.c_str(), to_sip.c_str(),
-                                                             contact.str().c_str(), 3600, &register_message);
+    int register_id = eXosip_register_build_initial_register(sip_context, from_sip.c_str(), to_sip.c_str(), contact.str().c_str(), 3600, &register_message);
     if (nullptr == register_message) {
         spdlog::error("eXosip_register_build_initial_register failed");
         return;
@@ -269,8 +267,7 @@ void Device::process_request() {
 
                     osip_message_get_www_authenticate(evt->response, 0, &www_authenticate_header);
 
-                    if (eXosip_add_authentication_info(sip_context, device_sip_id.c_str(), username.c_str(),
-                                                       password.c_str(), "MD5", www_authenticate_header->realm)) {
+                    if (eXosip_add_authentication_info(sip_context, device_sip_id.c_str(), username.c_str(), password.c_str(), "MD5", www_authenticate_header->realm)) {
                         spdlog::error("register add auth failed");
                         break;
                     };
@@ -370,6 +367,7 @@ void Device::process_request() {
                 ss << "a=sendonly\r\n";
                 ss << "a=rtpmap:96 PS/90000\r\n";
                 ss << "y=" << ssrc << "\r\n";
+                ss << "f=v/2/5/10/2/2048/a/1/8/1\r\n";
                 string sdp_output_str = ss.str();
 
                 size_t size = sdp_output_str.size();
@@ -453,8 +451,7 @@ void Device::process_devicestatus_query(string sn) {
     time(&rawtime);
     timeinfo = localtime(&rawtime);
     char curtime[72] = {0};
-    sprintf(curtime, "%d-%d-%dT%02d:%02d:%02d", (timeinfo->tm_year + 1900), (timeinfo->tm_mon + 1), timeinfo->tm_mday,
-            timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
+    sprintf(curtime, "%d-%d-%dT%02d:%02d:%02d", (timeinfo->tm_year + 1900), (timeinfo->tm_mon + 1), timeinfo->tm_mday, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
 
     ss << "<?xml version=\"1.0\"?>\r\n";
     ss << "<Response>\r\n";
@@ -490,7 +487,7 @@ void Device::process_deviceinfo_query(string sn) {
     ss << "<DeviceID>" << device_sip_id << "</DeviceID>\r\n";
     ss << "<Result>OK</Result>\r\n";
     ss << "<DeviceType>simulate client</DeviceType>\r\n";
-    ss << "<Manufacturer>ZHD</Manufacturer>\r\n";
+    ss << "<Manufacturer>GHI</Manufacturer>\r\n";
     ss << "<Model>28181</Model>\r\n";
     ss << "<Firmware>fireware</Firmware>\r\n";
     ss << "<MaxCamera>1</MaxCamera>\r\n";
@@ -535,8 +532,7 @@ void Device::heartbeat_task() {
 
 osip_message_t* Device::create_msg() {
     osip_message_t* request = nullptr;
-    auto status =
-        eXosip_message_build_request(sip_context, &request, "MESSAGE", to_sip.c_str(), from_sip.c_str(), nullptr);
+    auto status = eXosip_message_build_request(sip_context, &request, "MESSAGE", to_sip.c_str(), from_sip.c_str(), nullptr);
     if (OSIP_SUCCESS != status) {
         spdlog::error("build request failed: {}", status);
     }
