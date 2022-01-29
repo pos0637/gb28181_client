@@ -34,28 +34,18 @@ void Device::push_rtp_stream() {
     }
 
     char ps_header[PS_HDR_LEN];
-
     char ps_system_header[SYS_HDR_LEN];
-
     char ps_map_header[PSM_HDR_LEN];
-
     char pes_header[PES_HDR_LEN];
-
     char rtp_header[RTP_HDR_LEN];
-
     int time_base = 90000;
     int fps = 24;
     int send_packet_interval = 1000 / fps;
-
     int interval = time_base / fps;
     long pts = 0;
-
     char frame[1024 * 128];
-
     int single_packet_max_length = 1400;
-
     char rtp_packet[RTP_HDR_LEN + 1400];
-
     // int ssrc = 0xffffffff;
     int rtp_seq = 0;
 

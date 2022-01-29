@@ -29,7 +29,7 @@ static void dump(unsigned char *buffer, int length, int type) {
 }
 
 void out_nalu(char *buffer, int size, NaluType naluType) {
-    dump((unsigned char *)buffer, size, naluType);
+    // dump((unsigned char *)buffer, size, naluType);
     // std::cout << "rtp_packet >>> " << binToHex((unsigned char *)buffer, size);
 
     if (NALU_TYPE_SPS == naluType) {
