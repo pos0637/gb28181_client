@@ -2,8 +2,8 @@
 
 #include <vector>
 
+#include "cnalu.h"
 #include "h264_parser.h"
-#include "nalu.h"
 #include "stdlib.h"
 
 using namespace std;
@@ -18,17 +18,21 @@ int pps_data_length = 0;
 
 static void dump(unsigned char *buffer, int length, int type) {
     printf("\n=======================\n");
-    printf("NALU %d length: %d\n", type, length);
+    printf("NALU type: %d, length: %d\n", type, length);
     for (int i = 0; i < length; i += 8) {
         for (int j = 0; j < 8; j++) {
-            printf("%02X ", buffer[i + j]);
+            if (i + j < length) {
+                printf("%02X ", buffer[i + j]);
+            } else {
+                printf("   ");
+            }
         }
         printf("\n");
     }
     printf("=======================\n\n");
 }
 
-void out_nalu(char *buffer, int size, NaluType naluType) {
+void out_nalu(unsigned char *buffer, int size, NaluType naluType) {
     // dump((unsigned char *)buffer, size, naluType);
     // std::cout << "rtp_packet >>> " << binToHex((unsigned char *)buffer, size);
 
@@ -43,8 +47,8 @@ void out_nalu(char *buffer, int size, NaluType naluType) {
         pps_data_length = size;
         return;
     }
-    Nalu *nalu = new Nalu;
 
+    Nalu *nalu = new Nalu;
     bool is_i_frame = (NALU_TYPE_IDR == naluType);
 
     char *packet = (char *)malloc(is_i_frame ? (size + sps_data_length + pps_data_length) : size * sizeof(char));

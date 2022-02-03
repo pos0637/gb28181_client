@@ -2,7 +2,7 @@
 #define LOAD_H264_INCLUDE_H
 
 #include <vector>
-#include "nalu.h"
+#include "cnalu.h"
 
 extern std::vector<Nalu*> nalu_vector;
 int load(const char *path);
