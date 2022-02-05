@@ -8,11 +8,15 @@
 
 #include "header.h"
 
+#include <math.h>
+
 #include "frame.h"
 #include "parset.h"
 #include "slice.h"
 
 extern slice_t *currentSlice;
+extern int prevPicOrderCntMsb;
+extern int prevPicOrderCntLsb;
 
 #pragma mark - 函数声明
 // 解析前三个句法元素
@@ -96,6 +100,17 @@ void parse_rest_elememt_of_sliceHeader(bs_t *b) {
             slice_header->delta_pic_order_cnt_bottom = bs_read_se(b, "SH: delta_pic_order_cnt_bottom");
         } else {
             slice_header->delta_pic_order_cnt_bottom = 0;
+        }
+
+        // Calculate the MSBs of current picture
+        // MaxPicOrderCntLsb = 2^(log2_max_pic_order_cnt_lsb_minus4 + 4)
+        int MaxPicOrderCntLsb = pow(2, active_sps->log2_max_pic_order_cnt_lsb_minus4 + 4);
+        if (slice_header->pic_order_cnt_lsb < prevPicOrderCntLsb && (prevPicOrderCntLsb - slice_header->pic_order_cnt_lsb) >= (MaxPicOrderCntLsb / 2)) {
+            slice_header->pic_order_cnt_msb = prevPicOrderCntMsb + MaxPicOrderCntLsb;
+        } else if (slice_header->pic_order_cnt_lsb > prevPicOrderCntLsb && (slice_header->pic_order_cnt_lsb - prevPicOrderCntLsb) > (MaxPicOrderCntLsb / 2)) {
+            slice_header->pic_order_cnt_msb = prevPicOrderCntMsb - MaxPicOrderCntLsb;
+        } else {
+            slice_header->pic_order_cnt_msb = prevPicOrderCntMsb;
         }
     }
 

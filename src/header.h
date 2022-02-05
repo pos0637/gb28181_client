@@ -173,6 +173,8 @@ typedef struct
 //      slice_group_map_type >= 3 && slice_group_map_type <= 5)
         int slice_group_change_cycle;                     // u(v)
     
+// for poc
+        int pic_order_cnt_msb;
 } slice_header_t;
 
 //void processSlice(slice_t *slice);

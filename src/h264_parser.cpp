@@ -12,6 +12,8 @@
 typedef enum { NALU_PRIPORITY_DISPOSABLE = 0, NALU_PRIORITY_LOW = 1, NALU_PRIORITY_HIGH = 2, NALU_PRIORITY_HIGHTEST = 3, a } NaluPriority;
 
 slice_t *currentSlice;  // 当前正在解码的slice
+int prevPicOrderCntMsb = 0;
+int prevPicOrderCntLsb = 0;
 
 int simplest_h264_parser(const char *url, void (*out_nalu)(unsigned char *buffer, int size, NaluType type))
 // int simplest_h264_parser(const char *url)
@@ -39,6 +41,9 @@ int simplest_h264_parser(const char *url, void (*out_nalu)(unsigned char *buffer
         // 读取/解析 nalu
         read_nal_unit(nalu);
         nal_num++;
+        // reset pic_order_cnt
+        prevPicOrderCntMsb = currentSlice->slice_header.pic_order_cnt_msb;
+        prevPicOrderCntLsb = currentSlice->slice_header.pic_order_cnt_lsb;
 
         char type_str[20] = {0};
         switch (nalu->nal_unit_type) {
@@ -103,18 +108,22 @@ int simplest_h264_parser(const char *url, void (*out_nalu)(unsigned char *buffer
         char frame_type_str[20] = {0};
         if (nalu->nal_unit_type == NALU_TYPE_IDR) {
             sprintf(frame_type_str, "IDR");
+            // reset pic_order_cnt
+            prevPicOrderCntMsb = 0;
+            prevPicOrderCntLsb = 0;
         } else if (nalu->nal_unit_type == NALU_TYPE_SLICE) {
+            int pic_order_cnt = currentSlice->slice_header.pic_order_cnt_msb + currentSlice->slice_header.pic_order_cnt_lsb;
             switch (currentSlice->slice_header.slice_type) {
                 case Slice_Type_I:
                 case Slice_Type_SI:
-                    sprintf(frame_type_str, "I");
+                    sprintf(frame_type_str, "I %d", pic_order_cnt);
                     break;
                 case Slice_Type_P:
                 case Slice_Type_SP:
-                    sprintf(frame_type_str, "P");
+                    sprintf(frame_type_str, "P %d", pic_order_cnt);
                     break;
                 case Slice_Type_B:
-                    sprintf(frame_type_str, "B");
+                    sprintf(frame_type_str, "B %d", pic_order_cnt);
                     break;
                 default:
                     break;
