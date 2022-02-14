@@ -28,6 +28,7 @@ int simplest_h264_parser(const char *url, void (*out_nalu)(unsigned char *buffer
 
     FILE *myout = stdout;
     int nal_num = 0;
+    int frame_num = 0;
     int nal_length = 0;
     int curr_nal_start = 0;   // 当前找到的nalu起始位置
     int curr_find_index = 0;  // 当前查找的位置索引
@@ -106,13 +107,18 @@ int simplest_h264_parser(const char *url, void (*out_nalu)(unsigned char *buffer
         }
 
         char frame_type_str[20] = {0};
+        int pic_order_cnt = 0;
+        int pts = 0;
+        int dts = 0;
         if (nalu->nal_unit_type == NALU_TYPE_IDR) {
             sprintf(frame_type_str, "IDR");
+            frame_num++;
             // reset pic_order_cnt
             prevPicOrderCntMsb = 0;
             prevPicOrderCntLsb = 0;
         } else if (nalu->nal_unit_type == NALU_TYPE_SLICE) {
-            int pic_order_cnt = currentSlice->slice_header.pic_order_cnt_msb + currentSlice->slice_header.pic_order_cnt_lsb;
+            frame_num++;
+            pic_order_cnt = currentSlice->slice_header.pic_order_cnt_msb + currentSlice->slice_header.pic_order_cnt_lsb;
             switch (currentSlice->slice_header.slice_type) {
                 case Slice_Type_I:
                 case Slice_Type_SI:
@@ -128,9 +134,14 @@ int simplest_h264_parser(const char *url, void (*out_nalu)(unsigned char *buffer
                 default:
                     break;
             }
+
+            // Calculate pts and dts
+            pts = 1000 * (pic_order_cnt / 2) * ((active_sps->vui_parameters.time_scale / active_sps->vui_parameters.num_units_in_tick) / 2);
+            dts = 1000 * (frame_num - 1) * ((active_sps->vui_parameters.time_scale / active_sps->vui_parameters.num_units_in_tick) / 2);
         }
 
-        fprintf(myout, "%5d| %8d| %7s| %6s| %8s| %8d|\n", nal_num, nalu->nal_start_index, idc_str, type_str, frame_type_str, nal_length + (curr_nal_start - nalu->nal_start_index));
+        fprintf(myout, "%5d| %8d| %7s| %6s| %8s| %8d| %8d| %8d|\n", nal_num, nalu->nal_start_index, idc_str, type_str, frame_type_str,
+                nal_length + (curr_nal_start - nalu->nal_start_index), pts, dts);
 
         if (out_nalu != NULL && nalu->nal_unit_type != NALU_TYPE_SEI) {
             out_nalu(file_buff + nalu->nal_start_index, nal_length + (curr_nal_start - nalu->nal_start_index), static_cast<NaluType>(nalu->nal_unit_type));
