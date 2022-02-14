@@ -24,6 +24,9 @@ class Nalu {
     NaluType type;
     int spsLength;
     int ppsLength;
+    int time_base;
+    int pts;
+    int dts;
 
     ~Nalu() {
         if (packet != nullptr) {

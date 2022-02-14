@@ -32,7 +32,7 @@ static void dump(unsigned char *buffer, int length, int type) {
     printf("=======================\n\n");
 }
 
-void out_nalu(unsigned char *buffer, int size, NaluType naluType) {
+void out_nalu(unsigned char *buffer, int size, NaluType naluType, int time_base, int pts, int dts) {
     // dump((unsigned char *)buffer, size, naluType);
     // std::cout << "rtp_packet >>> " << binToHex((unsigned char *)buffer, size);
 
@@ -65,6 +65,9 @@ void out_nalu(unsigned char *buffer, int size, NaluType naluType) {
     nalu->packet = packet;
     nalu->length = size;
     nalu->type = naluType;
+    nalu->time_base = time_base;
+    nalu->pts = pts;
+    nalu->dts = dts;
 
     nalu_vector.push_back(nalu);
 }

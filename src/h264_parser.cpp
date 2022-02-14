@@ -15,7 +15,7 @@ slice_t *currentSlice;  // 当前正在解码的slice
 int prevPicOrderCntMsb = 0;
 int prevPicOrderCntLsb = 0;
 
-int simplest_h264_parser(const char *url, void (*out_nalu)(unsigned char *buffer, int size, NaluType type))
+int simplest_h264_parser(const char *url, void (*out_nalu)(unsigned char *buffer, int size, NaluType type, int time_base, int pts, int dts))
 // int simplest_h264_parser(const char *url)
 {
     // 0. 读取h264文件
@@ -110,6 +110,7 @@ int simplest_h264_parser(const char *url, void (*out_nalu)(unsigned char *buffer
         int pic_order_cnt = 0;
         int pts = 0;
         int dts = 0;
+        int time_base = 0;
         if (nalu->nal_unit_type == NALU_TYPE_IDR) {
             sprintf(frame_type_str, "IDR");
             frame_num++;
@@ -136,15 +137,16 @@ int simplest_h264_parser(const char *url, void (*out_nalu)(unsigned char *buffer
             }
 
             // Calculate pts and dts
-            pts = 1000 * (pic_order_cnt / 2) * ((active_sps->vui_parameters.time_scale / active_sps->vui_parameters.num_units_in_tick) / 2);
-            dts = 1000 * (frame_num - 1) * ((active_sps->vui_parameters.time_scale / active_sps->vui_parameters.num_units_in_tick) / 2);
+            time_base = 1000 * ((active_sps->vui_parameters.time_scale / active_sps->vui_parameters.num_units_in_tick) / 2);
+            pts = pic_order_cnt / 2;
+            dts = frame_num - 1;
         }
 
         fprintf(myout, "%5d| %8d| %7s| %6s| %8s| %8d| %8d| %8d|\n", nal_num, nalu->nal_start_index, idc_str, type_str, frame_type_str,
-                nal_length + (curr_nal_start - nalu->nal_start_index), pts, dts);
+                nal_length + (curr_nal_start - nalu->nal_start_index), pts * time_base, dts * time_base);
 
         if (out_nalu != NULL && nalu->nal_unit_type != NALU_TYPE_SEI) {
-            out_nalu(file_buff + nalu->nal_start_index, nal_length + (curr_nal_start - nalu->nal_start_index), static_cast<NaluType>(nalu->nal_unit_type));
+            out_nalu(file_buff + nalu->nal_start_index, nal_length + (curr_nal_start - nalu->nal_start_index), static_cast<NaluType>(nalu->nal_unit_type), time_base, pts, dts);
         }
     }
 

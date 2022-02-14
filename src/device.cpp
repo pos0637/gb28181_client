@@ -43,6 +43,9 @@ void Device::push_rtp_stream() {
     int send_packet_interval = 1000 / fps;
     int interval = time_base / fps;
     long pts = 0;
+    long dts = 0;
+    long temp_pts = 0;
+    long temp_dts = 0;
     char frame[1024 * 128];
     int single_packet_max_length = 1400;
     char rtp_packet[RTP_HDR_LEN + 1400];
@@ -97,7 +100,9 @@ void Device::push_rtp_stream() {
                 index += nalu->ppsLength;
 
                 //封装pes
-                gb28181_make_pes_header(pes_header, 0xe0, length - nalu->ppsLength - nalu->ppsLength, pts, pts);
+                pts += temp_pts;
+                dts += temp_dts;
+                gb28181_make_pes_header(pes_header, 0xe0, length - nalu->ppsLength - nalu->ppsLength, pts * nalu->time_base, dts * nalu->time_base);
 
                 memcpy(frame + index, pes_header, PES_HDR_LEN);
                 index += PES_HDR_LEN;
@@ -111,7 +116,9 @@ void Device::push_rtp_stream() {
                 index += PS_HDR_LEN;
 
                 //封装pes
-                gb28181_make_pes_header(pes_header, 0xe0, length, pts, pts);
+                gb28181_make_pes_header(pes_header, 0xe0, length, (pts + nalu->pts) * nalu->time_base, (dts + nalu->dts)  * nalu->time_base);
+                temp_pts = nalu->pts;
+                temp_dts = nalu->dts;
 
                 memcpy(frame + index, pes_header, PES_HDR_LEN);
                 index += PES_HDR_LEN;
@@ -158,8 +165,6 @@ void Device::push_rtp_stream() {
                     return;
                 }
             }
-
-            pts += interval;
 
             std::this_thread::sleep_for(std::chrono::milliseconds(send_packet_interval));
         }
