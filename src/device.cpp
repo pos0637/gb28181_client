@@ -64,6 +64,8 @@ void Device::push_rtp_stream() {
             if (NALU_TYPE_IDR == type) {
                 pts += temp_pts;
                 dts += temp_dts;
+                temp_pts = 0;
+                temp_dts = 0;
 
                 gb28181_make_ps_header(ps_header, pts);
 
@@ -117,8 +119,13 @@ void Device::push_rtp_stream() {
 
                 //封装pes
                 gb28181_make_pes_header(pes_header, 0xe0, length, (pts + nalu->pts) * nalu->time_base, (dts + nalu->dts) * nalu->time_base);
-                temp_pts = nalu->pts;
-                temp_dts = nalu->dts;
+                if (nalu->pts > temp_pts) {
+                    temp_pts = nalu->pts;
+                }
+
+                if (nalu->dts > temp_dts) {
+                    temp_dts = nalu->dts;
+                }
 
                 memcpy(frame + index, pes_header, PES_HDR_LEN);
                 index += PES_HDR_LEN;

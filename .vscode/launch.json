@@ -18,7 +18,7 @@
                 "--username", "36012200002021080403",
                 "--password", "12345678",
                 "--manufacture", "GHI",
-                "--filepath", "/root/programs/gb28181_client/samples/test1.h264",
+                "--filepath", "/root/programs/gb28181_client/samples/bigbuckbunny_1280x720_24fps_annexb_012.h264",
             ],
             "stopAtEntry": true,
             "cwd": "${fileDirname}",
