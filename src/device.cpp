@@ -116,7 +116,7 @@ void Device::push_rtp_stream() {
                 index += PS_HDR_LEN;
 
                 //封装pes
-                gb28181_make_pes_header(pes_header, 0xe0, length, (pts + nalu->pts) * nalu->time_base, (dts + nalu->dts)  * nalu->time_base);
+                gb28181_make_pes_header(pes_header, 0xe0, length, (pts + nalu->pts) * nalu->time_base, (dts + nalu->dts) * nalu->time_base);
                 temp_pts = nalu->pts;
                 temp_dts = nalu->dts;
 
@@ -128,11 +128,9 @@ void Device::push_rtp_stream() {
             }
 
             //组包rtp
-
             int rtp_packet_count = ((index - 1) / single_packet_max_length) + 1;
-
             for (int i = 0; i < rtp_packet_count; i++) {
-                gb28181_make_rtp_header(rtp_header, rtp_seq, pts, atoi(ssrc.c_str()), i == (rtp_packet_count - 1));
+                gb28181_make_rtp_header(rtp_header, rtp_seq, nalu->time_base, atoi(ssrc.c_str()), i == (rtp_packet_count - 1));
 
                 int writed_count = single_packet_max_length;
 

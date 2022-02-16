@@ -114,6 +114,7 @@ int simplest_h264_parser(const char *url, void (*out_nalu)(unsigned char *buffer
         if (nalu->nal_unit_type == NALU_TYPE_IDR) {
             sprintf(frame_type_str, "IDR");
             frame_num++;
+            time_base = 1000 * ((active_sps->vui_parameters.time_scale / active_sps->vui_parameters.num_units_in_tick) / 2);
             // reset pic_order_cnt
             prevPicOrderCntMsb = 0;
             prevPicOrderCntLsb = 0;
