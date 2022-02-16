@@ -193,7 +193,6 @@ int gb28181_make_pes_header(char *pData, int stream_id, int payload_len, int64_t
  */
 int gb28181_make_rtp_header(char *pData, int seqNum, int64_t timestamp, int ssrc, int isEnd)
 {
-
 	bits_buffer_t  	bitsBuffer;
 	bitsBuffer.i_size = RTP_HDR_LEN;
 	bitsBuffer.i_data = 0;

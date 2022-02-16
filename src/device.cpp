@@ -52,10 +52,6 @@ void Device::push_rtp_stream() {
     // int ssrc = 0xffffffff;
     int rtp_seq = 0;
 
-    // Nalu *nalu = new Nalu();
-    // nalu->packet = (char *)malloc(1024*128);
-    // nalu->length = 1024 * 128;
-
     while (is_pushing) {
         for (auto i = 0; i < nalu_vector.size(); i++) {
             auto nalu = nalu_vector.at(i);
@@ -66,12 +62,15 @@ void Device::push_rtp_stream() {
 
             int index = 0;
             if (NALU_TYPE_IDR == type) {
+                pts += temp_pts;
+                dts += temp_dts;
+
                 gb28181_make_ps_header(ps_header, pts);
 
                 memcpy(frame, ps_header, PS_HDR_LEN);
                 index += PS_HDR_LEN;
 
-                gb28181_make_sys_header(ps_system_header, 0x3f);
+                gb28181_make_sys_header(ps_system_header, 1);
 
                 memcpy(frame + index, ps_system_header, SYS_HDR_LEN);
                 index += SYS_HDR_LEN;
@@ -82,7 +81,7 @@ void Device::push_rtp_stream() {
                 index += PSM_HDR_LEN;
 
                 //封装pes
-                gb28181_make_pes_header(pes_header, 0xe0, nalu->spsLength, pts, pts);
+                gb28181_make_pes_header(pes_header, 0xe0, nalu->spsLength, pts * nalu->time_base, dts * nalu->time_base);
 
                 memcpy(frame + index, pes_header, PES_HDR_LEN);
                 index += PES_HDR_LEN;
@@ -91,7 +90,7 @@ void Device::push_rtp_stream() {
                 index += nalu->spsLength;
 
                 //封装pes
-                gb28181_make_pes_header(pes_header, 0xe0, nalu->ppsLength, pts, pts);
+                gb28181_make_pes_header(pes_header, 0xe0, nalu->ppsLength, pts * nalu->time_base, dts * nalu->time_base);
 
                 memcpy(frame + index, pes_header, PES_HDR_LEN);
                 index += PES_HDR_LEN;
@@ -100,17 +99,16 @@ void Device::push_rtp_stream() {
                 index += nalu->ppsLength;
 
                 //封装pes
-                pts += temp_pts;
-                dts += temp_dts;
                 gb28181_make_pes_header(pes_header, 0xe0, length - nalu->spsLength - nalu->ppsLength, pts * nalu->time_base, dts * nalu->time_base);
-                pts++;
-                dts++;
 
                 memcpy(frame + index, pes_header, PES_HDR_LEN);
                 index += PES_HDR_LEN;
 
                 memcpy(frame + index, packet + nalu->spsLength + nalu->ppsLength, length - nalu->spsLength - nalu->ppsLength);
                 index += length - nalu->spsLength - nalu->ppsLength;
+
+                pts++;
+                dts++;
             } else {
                 gb28181_make_ps_header(ps_header, pts);
 
