@@ -102,13 +102,15 @@ void Device::push_rtp_stream() {
                 //封装pes
                 pts += temp_pts;
                 dts += temp_dts;
-                gb28181_make_pes_header(pes_header, 0xe0, length - nalu->ppsLength - nalu->ppsLength, pts * nalu->time_base, dts * nalu->time_base);
+                gb28181_make_pes_header(pes_header, 0xe0, length - nalu->spsLength - nalu->ppsLength, pts * nalu->time_base, dts * nalu->time_base);
+                pts++;
+                dts++;
 
                 memcpy(frame + index, pes_header, PES_HDR_LEN);
                 index += PES_HDR_LEN;
 
-                memcpy(frame + index, packet + nalu->spsLength + nalu->ppsLength, length - nalu->ppsLength - nalu->ppsLength);
-                index += length - nalu->ppsLength - nalu->ppsLength;
+                memcpy(frame + index, packet + nalu->spsLength + nalu->ppsLength, length - nalu->spsLength - nalu->ppsLength);
+                index += length - nalu->spsLength - nalu->ppsLength;
             } else {
                 gb28181_make_ps_header(ps_header, pts);
 
