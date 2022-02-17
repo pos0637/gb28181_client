@@ -114,7 +114,7 @@ int simplest_h264_parser(const char *url, void (*out_nalu)(unsigned char *buffer
         if (nalu->nal_unit_type == NALU_TYPE_IDR) {
             sprintf(frame_type_str, "IDR");
             frame_num = 0;
-            time_base = 1000 * ((active_sps->vui_parameters.time_scale / active_sps->vui_parameters.num_units_in_tick) / 2);
+            time_base = 90000 / ((active_sps->vui_parameters.time_scale / active_sps->vui_parameters.num_units_in_tick) / 2);
             // reset pic_order_cnt
             prevPicOrderCntMsb = 0;
             prevPicOrderCntLsb = 0;
@@ -138,9 +138,11 @@ int simplest_h264_parser(const char *url, void (*out_nalu)(unsigned char *buffer
             }
 
             // Calculate pts and dts
-            time_base = 1000 * ((active_sps->vui_parameters.time_scale / active_sps->vui_parameters.num_units_in_tick) / 2);
+            time_base = 90000 / ((active_sps->vui_parameters.time_scale / active_sps->vui_parameters.num_units_in_tick) / 2);
             pts = pic_order_cnt / 2;
             dts = frame_num - 1;
+        } else if (nalu->nal_unit_type == NALU_TYPE_AUD) {
+            continue;
         }
 
         fprintf(myout, "%5d| %8d| %7s| %6s| %8s| %8d| %8d| %8d|\n", nal_num, nalu->nal_start_index, idc_str, type_str, frame_type_str,

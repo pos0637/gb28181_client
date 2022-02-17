@@ -171,7 +171,11 @@ void Device::push_rtp_stream() {
                 }
             }
 
-            std::this_thread::sleep_for(std::chrono::milliseconds(send_packet_interval));
+            if (nalu->time_base > 0) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(1000 / (90000 / nalu->time_base)));
+            } else {
+                std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 30));
+            }
         }
     }
 
