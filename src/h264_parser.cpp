@@ -139,7 +139,7 @@ int simplest_h264_parser(const char *url, void (*out_nalu)(unsigned char *buffer
 
             // Calculate pts and dts
             time_base = 90000 / ((active_sps->vui_parameters.time_scale / active_sps->vui_parameters.num_units_in_tick) / 2);
-            pts = pic_order_cnt / 2;
+            pts = (active_sps->pic_order_cnt_type == 0) ? pic_order_cnt / 2 : frame_num - 1;
             dts = frame_num - 1;
         } else if (nalu->nal_unit_type == NALU_TYPE_AUD) {
             continue;
