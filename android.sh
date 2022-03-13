@@ -10,9 +10,17 @@ export PREBUILT=$NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64
 export PLATFORM=$PREBUILT/sysroot
 
 export TARGET=aarch64-linux-android
+export HOST=aarch64-linux-android
+
 # export TARGET=armv7a-linux-androideabi
+# export HOST=arm-linux
+
 # export TARGET=i686-linux-android
+# export HOST=i686-linux-android
+
 # export TARGET=x86_64-linux-android
+# export HOST=x86_64-linux-android
+
 export API=31
 
 export AR=$PREBUILT/bin/llvm-ar
@@ -24,6 +32,7 @@ export RANLIB=$PREBUILT/bin/llvm-ranlib
 export STRIP=$PREBUILT/bin/llvm-strip
 
 export CFLAGS="--sysroot=$PLATFORM -I$PLATFORM/usr/include -fPIC -pthread"
+export CXXFLAGS="--sysroot=$PLATFORM -I$PLATFORM/usr/include -fPIC -pthread"
 export LDFLAGS="-Wl,-rpath-link=$PLATFORM/usr/lib -L$PLATFORM/usr/lib"
 
 # libosip2
@@ -31,7 +40,7 @@ rm -rf libosip2-$VERSION
 tar xvf libosip2-$VERSION.tar.gz
 cd libosip2-$VERSION
 
-./configure --prefix=$WORKSPACE --host=$TARGET --disable-shared --enable-static
+./configure --prefix=$WORKSPACE --host=$HOST --disable-shared --enable-static
 make install
 
 cd $WORKSPACE/3rd_party
@@ -41,7 +50,7 @@ rm -rf libosip2-$VERSION
 tar xvf libeXosip2-$VERSION.tar.gz
 cd libeXosip2-$VERSION
 
-./configure --prefix=$WORKSPACE --host=$TARGET --disable-shared --enable-static LDFLAGS="-L$WORKSPACE/lib" CFLAGS="-L$WORKSPACE/include"
+./configure --prefix=$WORKSPACE --host=$HOST --disable-shared --enable-static LDFLAGS="-L$WORKSPACE/lib" CFLAGS="-L$WORKSPACE/include"
 make install
 
 cd $WORKSPACE/3rd_party
