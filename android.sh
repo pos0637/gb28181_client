@@ -31,26 +31,30 @@ export LD=$PREBUILT/bin/ld
 export RANLIB=$PREBUILT/bin/llvm-ranlib
 export STRIP=$PREBUILT/bin/llvm-strip
 
-export CFLAGS="--sysroot=$PLATFORM -I$PLATFORM/usr/include -fPIC -pthread"
-export CXXFLAGS="--sysroot=$PLATFORM -I$PLATFORM/usr/include -fPIC -pthread"
+# libosip2
+export CFLAGS="--sysroot=$PLATFORM -I$PLATFORM/usr/include -fPIC -pthread -DOSIP_MT"
+export CXXFLAGS="--sysroot=$PLATFORM -I$PLATFORM/usr/include -fPIC -pthread -DOSIP_MT"
 export LDFLAGS="-Wl,-rpath-link=$PLATFORM/usr/lib -L$PLATFORM/usr/lib"
 
-# libosip2
 rm -rf libosip2-$VERSION
 tar xvf libosip2-$VERSION.tar.gz
 cd libosip2-$VERSION
 
-./configure --prefix=$WORKSPACE --host=$HOST --disable-shared --enable-static
+./configure --prefix=$WORKSPACE --host=$HOST --disable-shared --enable-static --enable-pic
 make install
 
 cd $WORKSPACE/3rd_party
 rm -rf libosip2-$VERSION
 
 # libexosip2
+export CFLAGS="--sysroot=$PLATFORM -I$PLATFORM/usr/include -I$WORKSPACE/include -fPIC -pthread -DOSIP_MT"
+export CXXFLAGS="--sysroot=$PLATFORM -I$PLATFORM/usr/include I$WORKSPACE/include -fPIC -pthread -DOSIP_MT"
+export LDFLAGS="-Wl,-rpath-link=$PLATFORM/usr/lib -L$PLATFORM/usr/lib -L$WORKSPACE/lib"
+
 tar xvf libeXosip2-$VERSION.tar.gz
 cd libeXosip2-$VERSION
 
-./configure --prefix=$WORKSPACE --host=$HOST --disable-shared --enable-static LDFLAGS="-L$WORKSPACE/lib" CFLAGS="-L$WORKSPACE/include"
+./configure --prefix=$WORKSPACE --host=$HOST --disable-shared --enable-static --enable-pic
 make install
 
 cd $WORKSPACE/3rd_party
